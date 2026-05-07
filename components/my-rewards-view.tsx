@@ -10,6 +10,20 @@ interface Reward {
   status: string;
   amount: string;
   claimedAt: string;
+  makePayment: string;
+}
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
 }
 
 export default function MyRewardsView({ userPhone }: { userPhone: string }) {
@@ -20,7 +34,7 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
     const fetchRewards = async () => {
       try {
         const response = await fetch(
-          `https://script.google.com/macros/s/AKfycby5X_G6B7C9_fN5xV_yP_K_yR_K_yR_K_yR_K_yR_K/exec?sheet=Coupons&action=fetch`
+          `https://script.google.com/macros/s/AKfycbzx7TVAWVJjTrHLWQJ_nKorZy33kuJ5JcYRdQ0vIekPiWrQy1ZXFdmk0wy7EMf_wIpb/exec?sheet=Coupons&action=fetch`
         );
         const data = await response.json();
         if (data.success && data.data) {
@@ -34,6 +48,7 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
               status: row[2],
               amount: row[3],
               claimedAt: row[5],
+              makePayment: row[8] || '',
             }));
           setRewards(userRewards);
         }
@@ -89,7 +104,7 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
                 <Clock className="w-6 h-6 text-blue-600" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-slate-800">{rewards.filter(r => r.status === 'used').length}</p>
+            <p className="text-3xl font-bold text-slate-800">{rewards.filter(r => r.makePayment && r.makePayment.trim() !== '').length}</p>
             <p className="text-sm text-slate-500 mt-1">Successfully Verified</p>
           </CardContent>
         </Card>
@@ -126,7 +141,7 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                          <span className="text-sm text-slate-600">{reward.claimedAt || reward.created}</span>
+                          <span className="text-sm text-slate-600">{formatDate(reward.claimedAt || reward.created)}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">

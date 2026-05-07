@@ -22,7 +22,7 @@ export default function MyProfileView({ userPhone }: { userPhone: string }) {
     const fetchProfile = async () => {
       try {
         const response = await fetch(
-          `https://script.google.com/macros/s/AKfycby5X_G6B7C9_fN5xV_yP_K_yR_K_yR_K_yR_K_yR_K/exec?sheet=Login&action=fetch`
+          `https://script.google.com/macros/s/AKfycbzx7TVAWVJjTrHLWQJ_nKorZy33kuJ5JcYRdQ0vIekPiWrQy1ZXFdmk0wy7EMf_wIpb/exec?sheet=Login&action=fetch`
         );
         const data = await response.json();
         if (data.success && data.data) {
