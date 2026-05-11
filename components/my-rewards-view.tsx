@@ -154,7 +154,9 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                           reward.status === 'used' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
                         }`}>
-                          {reward.status}
+                          {reward.status === 'used' 
+                            ? (reward.makePayment === 'Done' ? 'Reward Transferred🎉' : 'Used') 
+                            : reward.status}
                         </span>
                       </td>
                     </tr>

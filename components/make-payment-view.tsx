@@ -663,7 +663,7 @@ export default function MakePaymentView() {
                         <div>
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
                             <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-green-500" />
-                            {item.paymentStatus}
+                            {item.paymentStatus === "Done" ? "Paid" : item.paymentStatus}
                           </span>
                         </div>
                       </div>
@@ -717,7 +717,7 @@ export default function MakePaymentView() {
                               ₹{item.reward}
                             </span>
                             <span className="inline-flex mt-1 items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                              {item.paymentStatus}
+                               {item.paymentStatus === "Done" ? "Paid" : item.paymentStatus}
                             </span>
                           </div>
                         </div>
@@ -769,7 +769,7 @@ export default function MakePaymentView() {
             </DialogTitle>
             <DialogDescription>
               Are you sure you want to mark {selectedItems.length} payment(s) as
-              Done?
+              Paid?
             </DialogDescription>
           </DialogHeader>
           <div className="bg-orange-50 rounded-xl p-4 my-4">
