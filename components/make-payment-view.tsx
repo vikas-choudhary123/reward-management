@@ -576,6 +576,7 @@ export default function MakePaymentView() {
                             />
                             <div>
                               <p className="font-mono font-bold text-slate-800">
+                                {item.sn && <span className="text-red-500 mr-2">[{item.sn}]</span>}
                                 {item.code}
                               </p>
                               <p className="text-xs text-slate-400">
@@ -740,6 +741,7 @@ export default function MakePaymentView() {
                         <div className="flex items-start justify-between mb-3">
                           <div>
                             <p className="font-mono font-bold text-slate-800">
+                              {item.sn && <span className="text-green-600 mr-2">[{item.sn}]</span>}
                               {item.code}
                             </p>
                             <p className="text-xs text-slate-400">

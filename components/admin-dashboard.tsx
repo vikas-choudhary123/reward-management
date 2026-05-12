@@ -220,6 +220,7 @@ const CouponTable = ({
             <div className="flex items-start justify-between mb-2">
               <div>
                 <div className="font-mono text-sm font-bold text-slate-800 mb-1">
+                  {coupon.sn && <span className="text-red-500 mr-2">[{coupon.sn}]</span>}
                   {coupon.code}
                 </div>
                 <span
