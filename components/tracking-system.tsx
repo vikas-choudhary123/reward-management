@@ -51,6 +51,7 @@ interface Coupon {
   upiId?: string;
   claimedBy?: string;
   claimedAt?: string;
+  sn?: string;
   rowIndex: number;
 }
 
@@ -224,6 +225,7 @@ export default function PremiumTrackingSystem() {
             claimedAt: row[5] || null,
             phone: row[6] || null,
             upiId: row[7] || null,
+            sn: row[13] ? String(row[13]) : "—",
             rowIndex: index + 2,
           }))
           .filter(
@@ -926,7 +928,8 @@ export default function PremiumTrackingSystem() {
               <div className="flex-col hidden h-full overflow-hidden bg-white border border-gray-100 shadow-sm lg:flex rounded-xl">
                 {/* Table Header - Fixed */}
                 <div className="flex-shrink-0 px-5 py-3 bg-gradient-to-r from-red-600 to-red-700">
-                  <div className="grid grid-cols-7 gap-4 text-xs font-medium tracking-wider text-white uppercase">
+                  <div className="grid grid-cols-8 gap-4 text-xs font-medium tracking-wider text-white uppercase">
+                    <div>SN</div>
                     <div>Code</div>
                     <div>Status</div>
                     <div>Reward</div>
@@ -958,9 +961,12 @@ export default function PremiumTrackingSystem() {
                       return (
                         <div
                           key={coupon.code}
-                          className={`grid grid-cols-7 gap-4 px-5 py-3.5 items-center hover:bg-red-50/10 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                          className={`grid grid-cols-8 gap-4 px-5 py-3.5 items-center hover:bg-red-50/10 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                             }`}
                         >
+                          <div className="text-sm font-medium text-slate-500">
+                            {coupon.sn || "—"}
+                          </div>
                           <div className="font-mono text-sm font-semibold tracking-wide text-slate-800">
                             {coupon.code}
                           </div>
@@ -1070,6 +1076,7 @@ export default function PremiumTrackingSystem() {
                               />
                               <div>
                                 <div className="font-mono text-base font-bold tracking-wide text-slate-800">
+                                  {coupon.sn && <span className="text-red-500 mr-2">[{coupon.sn}]</span>}
                                   {coupon.code}
                                 </div>
                                 <span

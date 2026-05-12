@@ -11,6 +11,8 @@ interface Reward {
   amount: string;
   claimedAt: string;
   makePayment: string;
+  remark: string;
+  sn: string;
 }
 
 function formatDate(dateStr: string): string {
@@ -49,6 +51,8 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
               amount: row[3],
               claimedAt: row[5],
               makePayment: row[8] || '',
+              remark: row[12] || '',
+              sn: row[13] || '',
             }));
           setRewards(userRewards);
         }
@@ -129,15 +133,20 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50">
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">SN</th>
                     <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
                     <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Coupon Code</th>
                     <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Amount</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Remark</th>
                     <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {rewards.map((reward, i) => (
                     <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-medium text-slate-500">{reward.sn || "—"}</span>
+                      </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
@@ -149,6 +158,9 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-sm font-bold text-red-600">₹{reward.amount}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-sm text-slate-500 italic">{reward.remark || "—"}</span>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${

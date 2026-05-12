@@ -38,6 +38,8 @@ interface PaymentItem {
   upiId: string;
   claimedAt: string;
   paymentStatus: string;
+  remark: string;
+  sn: string;
   rowIndex: number;
   rawRow: any[]; // Store original row data to preserve all columns
 }
@@ -73,6 +75,7 @@ export default function MakePaymentView() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState<boolean>(false);
   const [successCount, setSuccessCount] = useState<number>(0);
+  const [paymentRemark, setPaymentRemark] = useState<string>("");
 
   const fetchPaymentData = async () => {
     setIsLoading(true);
@@ -105,6 +108,8 @@ export default function MakePaymentView() {
             phone: row[6] ? row[6].toString() : "",
             upiId: row[7] ? row[7].toString().trim() : "",
             paymentStatus: row[8] ? row[8].toString().trim() : "",
+            remark: row[12] ? row[12].toString() : "",
+            sn: row[13] ? row[13].toString() : "",
             rowIndex: index + 2, // +2 because of 0-indexing and header row
             rawRow: row, // Store original row to preserve all column data
           }));
@@ -180,6 +185,7 @@ export default function MakePaymentView() {
     if (selectedItems.length === 0) {
       return;
     }
+    setPaymentRemark("");
     setConfirmDialogOpen(true);
   };
 
@@ -193,7 +199,6 @@ export default function MakePaymentView() {
         const item = pendingItems.find((p) => p.code === code);
         if (!item) return Promise.resolve();
 
-        // Use markDeleted action to ONLY update Column I (column 9) - no other columns affected
         const updateParams = new URLSearchParams({
           sheetName: COUPONS_SHEET,
           action: "markDeleted",
@@ -202,11 +207,28 @@ export default function MakePaymentView() {
           value: "Done",
         });
 
-        return fetch(GOOGLE_SCRIPT_URL, {
+        const statusPromise = fetch(GOOGLE_SCRIPT_URL, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: updateParams.toString(),
         });
+
+        // Also update Remark in Column M (13)
+        const remarkParams = new URLSearchParams({
+          sheetName: COUPONS_SHEET,
+          action: "markDeleted",
+          rowIndex: item.rowIndex.toString(),
+          columnIndex: "13", // Column M (1-indexed)
+          value: paymentRemark,
+        });
+
+        const remarkPromise = fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: remarkParams.toString(),
+        });
+
+        return Promise.all([statusPromise, remarkPromise]);
       });
 
       // Wait for all updates to complete in parallel
@@ -412,7 +434,7 @@ export default function MakePaymentView() {
               <div className="hidden lg:flex flex-col h-full bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                 {/* Table Header */}
                 <div className="bg-gradient-to-r from-orange-600 to-orange-700 px-5 py-3 flex-shrink-0">
-                  <div className="grid grid-cols-8 gap-4 text-xs font-medium text-white uppercase tracking-wider">
+                  <div className="grid grid-cols-9 gap-4 text-xs font-medium text-white uppercase tracking-wider">
                     <div className="flex items-center gap-2">
                       <Checkbox
                         checked={
@@ -424,6 +446,7 @@ export default function MakePaymentView() {
                       />
                       Action
                     </div>
+                    <div>SN</div>
                     <div>Created Date</div>
                     <div>Code</div>
                     <div>Reward</div>
@@ -449,7 +472,7 @@ export default function MakePaymentView() {
                     filteredPendingItems.map((item, index) => (
                       <div
                         key={item.code}
-                        className={`grid grid-cols-8 gap-4 px-5 py-3.5 items-center hover:bg-orange-50/30 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                        className={`grid grid-cols-9 gap-4 px-5 py-3.5 items-center hover:bg-orange-50/30 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                           }`}
                       >
                         <div className="flex items-center gap-2">
@@ -460,6 +483,9 @@ export default function MakePaymentView() {
                             }
                             className="border-slate-300"
                           />
+                        </div>
+                        <div className="text-sm font-medium text-slate-500">
+                          {item.sn || "—"}
                         </div>
                         <div className="text-sm text-slate-500">
                           {formatDate(item.createdDate)}
@@ -600,7 +626,8 @@ export default function MakePaymentView() {
               <div className="hidden lg:flex flex-col h-full bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                 {/* Table Header */}
                 <div className="bg-gradient-to-r from-green-600 to-green-700 px-5 py-3 flex-shrink-0">
-                  <div className="grid grid-cols-8 gap-4 text-xs font-medium text-white uppercase tracking-wider">
+                  <div className="grid grid-cols-10 gap-4 text-xs font-medium text-white uppercase tracking-wider">
+                    <div>SN</div>
                     <div>Created Date</div>
                     <div>Code</div>
                     <div>Reward</div>
@@ -608,6 +635,7 @@ export default function MakePaymentView() {
                     <div>Phone</div>
                     <div>UPI Id</div>
                     <div>Claimed At</div>
+                    <div>Remark</div>
                     <div>Status</div>
                   </div>
                 </div>
@@ -627,9 +655,12 @@ export default function MakePaymentView() {
                     filteredHistoryItems.map((item, index) => (
                       <div
                         key={item.code}
-                        className={`grid grid-cols-8 gap-4 px-5 py-3.5 items-center hover:bg-green-50/30 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                        className={`grid grid-cols-10 gap-4 px-5 py-3.5 items-center hover:bg-green-50/30 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                           }`}
                       >
+                        <div className="text-sm font-medium text-slate-500">
+                          {item.sn || "—"}
+                        </div>
                         <div className="text-sm text-slate-500">
                           {formatDate(item.createdDate)}
                         </div>
@@ -659,6 +690,9 @@ export default function MakePaymentView() {
                         </div>
                         <div className="text-sm text-slate-500">
                           {formatDate(item.claimedAt)}
+                        </div>
+                        <div className="text-sm text-slate-500 truncate" title={item.remark}>
+                          {item.remark || "—"}
                         </div>
                         <div>
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
@@ -746,6 +780,12 @@ export default function MakePaymentView() {
                               {formatDate(item.claimedAt)}
                             </p>
                           </div>
+                          <div className="col-span-2">
+                            <p className="text-xs text-slate-400">Remark</p>
+                            <p className="text-slate-600 italic">
+                              {item.remark || "—"}
+                            </p>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -773,7 +813,7 @@ export default function MakePaymentView() {
             </DialogDescription>
           </DialogHeader>
           <div className="bg-orange-50 rounded-xl p-4 my-4">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-4">
               <div>
                 <p className="text-xs text-slate-400 uppercase">
                   Selected Items
@@ -791,6 +831,19 @@ export default function MakePaymentView() {
                     .reduce((sum, item) => sum + item.reward, 0)}
                 </p>
               </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="remark" className="text-xs font-medium text-slate-500 uppercase">
+                Payment Remark (Optional)
+              </label>
+              <Input
+                id="remark"
+                placeholder="Enter payment reference or remark..."
+                value={paymentRemark}
+                onChange={(e) => setPaymentRemark(e.target.value)}
+                className="h-10 rounded-xl border-orange-200 focus:border-orange-500 focus:ring-orange-500 bg-white"
+              />
             </div>
           </div>
           <div className="flex gap-3">

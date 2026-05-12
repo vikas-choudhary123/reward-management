@@ -38,6 +38,8 @@ interface Coupon {
   reward: number;
   claimedBy: string | null;
   claimedAt: string | null;
+  remark: string;
+  sn: string;
   rowIndex: number;
 }
 
@@ -90,15 +92,17 @@ const CouponTable = ({
           {/* Table Header */}
           <div className="bg-gradient-to-r from-red-600 to-red-700 px-5 py-3">
             <div
-              className={`grid ${showClaimInfo ? "grid-cols-7" : "grid-cols-5"
+              className={`grid ${showClaimInfo ? "grid-cols-9" : "grid-cols-6"
                 } gap-4 text-xs font-medium text-white uppercase tracking-wider`}
             >
+              <div>SN</div>
               <div>Code</div>
               <div>Status</div>
               <div>Reward</div>
               <div>Created</div>
               {showClaimInfo && <div>Claimed By</div>}
               {showClaimInfo && <div>Claimed At</div>}
+              {showClaimInfo && <div>Remark</div>}
               <div className="text-center">Actions</div>
             </div>
           </div>
@@ -108,10 +112,13 @@ const CouponTable = ({
             {coupons.map((coupon, index) => (
               <div
                 key={coupon.id}
-                className={`grid ${showClaimInfo ? "grid-cols-7" : "grid-cols-5"
+                className={`grid ${showClaimInfo ? "grid-cols-9" : "grid-cols-6"
                   } gap-4 px-5 py-3.5 items-center hover:bg-red-50/30 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                   }`}
               >
+                <div className="text-sm font-medium text-slate-500">
+                  {coupon.sn || "—"}
+                </div>
                 <div className="font-mono text-sm font-semibold text-slate-800 tracking-wide">
                   {coupon.code}
                 </div>
@@ -149,6 +156,11 @@ const CouponTable = ({
                 {showClaimInfo && (
                   <div className="text-sm text-slate-500">
                     {coupon.claimedAt ? formatDate(coupon.claimedAt) : "—"}
+                  </div>
+                )}
+                {showClaimInfo && (
+                  <div className="text-sm text-slate-500 truncate" title={coupon.remark}>
+                    {coupon.remark || "—"}
                   </div>
                 )}
                 <div className="text-center">
@@ -235,6 +247,12 @@ const CouponTable = ({
               <div className="text-xs text-slate-500 mb-2">
                 Claimed by:{" "}
                 <span className="text-slate-700">{coupon.claimedBy}</span>
+              </div>
+            )}
+
+            {coupon.remark && (
+              <div className="text-xs text-slate-500 mb-2 italic">
+                Remark: {coupon.remark}
               </div>
             )}
 
@@ -328,6 +346,8 @@ export default function PremiumAdminDashboard() {
             reward: row[3] || 0,
             claimedBy: row[4] || null,
             claimedAt: row[5] || null,
+            remark: row[12] || "",
+            sn: row[13] ? String(row[13]) : "",
             rowIndex: index + 2,
           }))
           .filter((coupon: Coupon) => coupon.code);
@@ -394,9 +414,20 @@ export default function PremiumAdminDashboard() {
       const result = await response.json();
 
       const existingCodes = new Set<string>();
+      let maxSN = 0;
       if (result.success && result.data) {
         result.data.slice(1).forEach((row: (string | number | null)[]) => {
           if (row[1]) existingCodes.add(String(row[1]));
+          
+          // Parse SN format "SN-001" to find max number
+          const snStr = String(row[13] || "");
+          if (snStr.startsWith("SN-")) {
+            const snNum = parseInt(snStr.replace("SN-", ""));
+            if (!isNaN(snNum) && snNum > maxSN) maxSN = snNum;
+          } else {
+            const snNum = Number(row[13]);
+            if (!isNaN(snNum) && snNum > maxSN) maxSN = snNum;
+          }
         });
       }
 
@@ -420,14 +451,15 @@ export default function PremiumAdminDashboard() {
       for (let i = 0; i < batchSizeNum; i++) {
         const uniqueCode = generateUniqueCode(existingCodes);
         existingCodes.add(uniqueCode);
-        newCoupons.push([
-          currentDate, // Col A: Creation Timestamp (YYYY-MM-DD HH:mm:ss)
-          uniqueCode,
-          "unused",
-          rewardAmountNum,
-          "",
-          "",
-        ]);
+        const snNum = maxSN + i + 1;
+        const snFormatted = `SN-${String(snNum).padStart(3, "0")}`;
+        
+        // Build a 14-element row to reach Column N (index 13)
+        const row = [
+          currentDate, uniqueCode, "unused", rewardAmountNum, "", "", 
+          "", "", "", "", "", "", "", snFormatted
+        ];
+        newCoupons.push(row);
       }
 
       await submitBatchToSheet(newCoupons);
