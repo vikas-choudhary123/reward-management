@@ -431,10 +431,10 @@ export default function MakePaymentView() {
             /* Pending Section */
             <>
               {/* Desktop Table */}
-              <div className="hidden lg:flex flex-col h-full bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="hidden lg:flex flex-col h-full bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
                 {/* Table Header */}
-                <div className="bg-gradient-to-r from-orange-600 to-orange-700 px-5 py-3 flex-shrink-0">
-                  <div className="grid grid-cols-9 gap-4 text-xs font-medium text-white uppercase tracking-wider">
+                <div className="bg-gradient-to-r from-orange-600 to-orange-700 px-5 py-3 flex-shrink-0 min-w-[1200px]">
+                  <div className="grid grid-cols-10 gap-4 text-xs font-medium text-white uppercase tracking-wider">
                     <div className="flex items-center gap-2">
                       <Checkbox
                         checked={
@@ -447,6 +447,7 @@ export default function MakePaymentView() {
                       Action
                     </div>
                     <div>SN</div>
+                    <div>Status</div>
                     <div>Created Date</div>
                     <div>Code</div>
                     <div>Reward</div>
@@ -458,7 +459,7 @@ export default function MakePaymentView() {
                 </div>
 
                 {/* Table Body */}
-                <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
+                <div className="flex-1 overflow-y-auto divide-y divide-gray-50 min-w-[1200px]">
                   {filteredPendingItems.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gray-50 flex items-center justify-center">
@@ -472,7 +473,7 @@ export default function MakePaymentView() {
                     filteredPendingItems.map((item, index) => (
                       <div
                         key={item.code}
-                        className={`grid grid-cols-9 gap-4 px-5 py-3.5 items-center hover:bg-orange-50/30 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                        className={`grid grid-cols-10 gap-4 px-5 py-3.5 items-center hover:bg-orange-50/30 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                           }`}
                       >
                         <div className="flex items-center gap-2">
@@ -487,6 +488,12 @@ export default function MakePaymentView() {
                         <div className="text-sm font-medium text-slate-500">
                           {item.sn || "—"}
                         </div>
+                        <div>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+                            <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-orange-500" />
+                            Pending
+                          </span>
+                        </div>
                         <div className="text-sm text-slate-500">
                           {formatDate(item.createdDate)}
                         </div>
@@ -497,7 +504,7 @@ export default function MakePaymentView() {
                           ₹{item.reward}
                         </div>
                         <div
-                          className="text-sm text-slate-500 truncate"
+                          className="text-sm text-slate-500 break-words"
                           title={item.claimedBy}
                         >
                           {item.claimedBy || "—"}
@@ -509,7 +516,7 @@ export default function MakePaymentView() {
                           {item.phone || "—"}
                         </div>
                         <div
-                          className="text-sm text-slate-500 truncate"
+                          className="text-sm text-slate-500 break-all"
                           title={item.upiId}
                         >
                           {item.upiId || "—"}
@@ -624,11 +631,12 @@ export default function MakePaymentView() {
             /* History Section */
             <>
               {/* Desktop Table */}
-              <div className="hidden lg:flex flex-col h-full bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="hidden lg:flex flex-col h-full bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
                 {/* Table Header */}
-                <div className="bg-gradient-to-r from-green-600 to-green-700 px-5 py-3 flex-shrink-0">
+                <div className="bg-gradient-to-r from-green-600 to-green-700 px-5 py-3 flex-shrink-0 min-w-[1200px]">
                   <div className="grid grid-cols-10 gap-4 text-xs font-medium text-white uppercase tracking-wider">
                     <div>SN</div>
+                    <div>Status</div>
                     <div>Created Date</div>
                     <div>Code</div>
                     <div>Reward</div>
@@ -637,12 +645,11 @@ export default function MakePaymentView() {
                     <div>UPI Id</div>
                     <div>Claimed At</div>
                     <div>Remark</div>
-                    <div>Status</div>
                   </div>
                 </div>
 
                 {/* Table Body */}
-                <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
+                <div className="flex-1 overflow-y-auto divide-y divide-gray-50 min-w-[1200px]">
                   {filteredHistoryItems.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gray-50 flex items-center justify-center">
@@ -662,6 +669,12 @@ export default function MakePaymentView() {
                         <div className="text-sm font-medium text-slate-500">
                           {item.sn || "—"}
                         </div>
+                        <div>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                            <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-green-500" />
+                            {item.paymentStatus === "Done" ? "Paid" : item.paymentStatus}
+                          </span>
+                        </div>
                         <div className="text-sm text-slate-500">
                           {formatDate(item.createdDate)}
                         </div>
@@ -672,7 +685,7 @@ export default function MakePaymentView() {
                           ₹{item.reward}
                         </div>
                         <div
-                          className="text-sm text-slate-500 truncate"
+                          className="text-sm text-slate-500 break-words"
                           title={item.claimedBy}
                         >
                           {item.claimedBy || "—"}
@@ -684,7 +697,7 @@ export default function MakePaymentView() {
                           {item.phone || "—"}
                         </div>
                         <div
-                          className="text-sm text-slate-500 truncate"
+                          className="text-sm text-slate-500 break-all"
                           title={item.upiId}
                         >
                           {item.upiId || "—"}
@@ -694,12 +707,6 @@ export default function MakePaymentView() {
                         </div>
                         <div className="text-sm text-slate-500 truncate" title={item.remark}>
                           {item.remark || "—"}
-                        </div>
-                        <div>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                            <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-green-500" />
-                            {item.paymentStatus === "Done" ? "Paid" : item.paymentStatus}
-                          </span>
                         </div>
                       </div>
                     ))

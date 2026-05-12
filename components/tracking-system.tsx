@@ -992,7 +992,7 @@ export default function PremiumTrackingSystem() {
                             ₹{coupon.reward}
                           </div>
                           <div
-                            className="text-sm truncate text-slate-500"
+                            className="text-sm break-words text-slate-500"
                             title={coupon.claimedBy || consumer?.name || ""}
                           >
                             {coupon.claimedBy || consumer?.name || "—"}
@@ -1004,7 +1004,7 @@ export default function PremiumTrackingSystem() {
                             {coupon.phone || consumer?.phone || "—"}
                           </div>
                           <div
-                            className="text-sm truncate text-slate-500"
+                            className="text-sm break-all text-slate-500"
                             title={coupon.upiId || consumer?.upiId}
                           >
                             {coupon.upiId || consumer?.upiId || "—"}
