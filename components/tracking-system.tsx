@@ -1167,6 +1167,9 @@ export default function PremiumTrackingSystem() {
                   <DialogTitle className="text-xl font-bold text-slate-900">
                     QR Code Batch Preview
                   </DialogTitle>
+                  <DialogDescription className="sr-only">
+                    Preview and print a batch of generated QR codes for rewards.
+                  </DialogDescription>
                   <p className="text-sm text-slate-500 font-medium">
                     Showing QR Codes {currentIndex - 9 + 1}–{currentIndex - 9 + batchCoupons.length}
                   </p>

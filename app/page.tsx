@@ -21,7 +21,7 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 interface User {
   name: string;
@@ -287,6 +287,12 @@ export default function CouponSystem() {
               side="left"
               className="p-0 w-[280px] bg-white border-r border-slate-100"
             >
+              <SheetHeader className="sr-only">
+                <SheetTitle>Navigation Menu</SheetTitle>
+                <SheetDescription>
+                  Access different sections of the reward management system.
+                </SheetDescription>
+              </SheetHeader>
               <div className="h-full flex flex-col">
                 {/* Drawer Header - User Profile Banner */}
                 <div className="bg-gradient-to-br from-red-600 to-red-700 p-6 pt-10 text-white">
