@@ -42,8 +42,10 @@ const COUPONS_SHEET = "Coupons";
 const CONSUMERS_SHEET = "User_Claimed_Coupon";
 
 interface Coupon {
+
   id: string;
   created: string;
+  generatedAt?: string; // NEW
   code: string;
   status: "used" | "unused" | "deleted";
   reward: number;
@@ -89,6 +91,21 @@ const formatDate = (dateStr: string): string => {
   } catch {
     return dateStr;
   }
+};
+
+const parseCouponDate = (dateStr: string): Date | null => {
+  if (!dateStr) return null;
+  const date = new Date(dateStr);
+  if (!isNaN(date.getTime())) {
+    return date;
+  }
+  try {
+    const match = dateStr.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      return new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
+    }
+  } catch { }
+  return null;
 };
 
 const BarcodeDisplay = ({ code, formLink, reward }: BarcodeDisplayProps) => {
@@ -193,6 +210,8 @@ export default function PremiumTrackingSystem() {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [batchCoupons, setBatchCoupons] = useState<Coupon[]>([]);
   const [isBatchModalOpen, setIsBatchModalOpen] = useState<boolean>(false);
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
 
   const fetchCoupons = async () => {
     setIsLoading(true);
@@ -208,23 +227,24 @@ export default function PremiumTrackingSystem() {
           .slice(1)
           .map((row: any[], index: number) => ({
             id: `coupon_${index + 1}`,
-            // Mapping per user request:
-            // Col A (0): Create Date -> created
-            // Col B (1): Code -> code
-            // Col C (2): Status -> status
-            // Col D (3): Reward -> reward
-            // Col E (4): Claimed By -> claimedBy
-            // Col F (5): Claimed At -> claimedAt (Date)
-            // Col G (6): Phone Number -> phone
-            // Col H (7): UPI ID -> upiId
+
+            // Col A (0): Created
+            // Col B (1): Code
+            // Col C (2): Status
+            // Col D (3): Reward
+
             created: row[0] || "",
+            generatedAt: row[0] || "",
+
             code: row[1] ? row[1].toString().trim() : "",
             status: (row[2] || "unused").toLowerCase(),
             reward: Number.parseFloat(row[3]) || 0,
+
             claimedBy: row[4] || null,
             claimedAt: row[5] || null,
             phone: row[6] || null,
             upiId: row[7] || null,
+
             sn: row[13] ? String(row[13]) : "—",
             rowIndex: index + 2,
           }))
@@ -611,7 +631,46 @@ export default function PremiumTrackingSystem() {
         coupon.claimedBy.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus =
       filterStatus === "all" || coupon.status === filterStatus;
-    return matchesSearch && matchesStatus;
+
+    let matchesDate = true;
+    if (fromDate || toDate) {
+      const couponDate = parseCouponDate(coupon.created || coupon.generatedAt || "");
+      if (couponDate) {
+        const couponTime = new Date(
+          couponDate.getFullYear(),
+          couponDate.getMonth(),
+          couponDate.getDate()
+        ).getTime();
+
+        if (fromDate) {
+          const from = new Date(fromDate);
+          const fromTime = new Date(
+            from.getFullYear(),
+            from.getMonth(),
+            from.getDate()
+          ).getTime();
+          if (couponTime < fromTime) {
+            matchesDate = false;
+          }
+        }
+
+        if (toDate) {
+          const to = new Date(toDate);
+          const toTime = new Date(
+            to.getFullYear(),
+            to.getMonth(),
+            to.getDate()
+          ).getTime();
+          if (couponTime > toTime) {
+            matchesDate = false;
+          }
+        }
+      } else {
+        matchesDate = false;
+      }
+    }
+
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
   // Sort by date (newest first)
@@ -773,19 +832,47 @@ export default function PremiumTrackingSystem() {
               <div className="flex items-center justify-center shadow-md w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-red-600 shadow-red-500/20">
                 <Users className="w-4 h-4 text-white" />
               </div>
-              <div>
-                <h2 className="text-base font-semibold text-slate-900">
-                  Tracking System
-                </h2>
-                <p className="text-xs text-slate-400">
-                  Overview of all coupons and redemptions
-                </p>
-              </div>
+
             </div>
 
-            <div className="flex flex-wrap w-full gap-2 lg:w-auto">
-              {/* Search */}
-              <div className="relative flex-grow lg:flex-grow-0 lg:w-64">
+            <div className="flex flex-wrap w-full gap-2 lg:w-auto items-center">
+              {/* Date Filters - Moved to LEFT */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">From:</span>
+                  <Input
+                    type="date"
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                    className="h-9 w-32 md:w-36 rounded-xl border-slate-200 focus:border-red-500 focus:ring-red-500 py-1 px-2.5 text-xs text-slate-600 bg-white"
+                  />
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">To:</span>
+                  <Input
+                    type="date"
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                    className="h-9 w-32 md:w-36 rounded-xl border-slate-200 focus:border-red-500 focus:ring-red-500 py-1 px-2.5 text-xs text-slate-600 bg-white"
+                  />
+                </div>
+                {(fromDate || toDate) && (
+                  <Button
+                    onClick={() => {
+                      setFromDate("");
+                      setToDate("");
+                    }}
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 px-2.5 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl"
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+
+              {/* Search - Moved to RIGHT */}
+              <div className="relative flex-grow lg:flex-grow-0 lg:w-40">
                 <Search className="absolute w-4 h-4 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
                 <Input
                   placeholder="Search..."
@@ -928,7 +1015,8 @@ export default function PremiumTrackingSystem() {
               <div className="flex-col hidden h-full overflow-hidden bg-white border border-gray-100 shadow-sm lg:flex rounded-xl">
                 {/* Table Header - Fixed */}
                 <div className="flex-shrink-0 px-5 py-3 bg-gradient-to-r from-red-600 to-red-700">
-                  <div className="grid grid-cols-8 gap-4 text-xs font-medium tracking-wider text-white uppercase">
+                  <div className="grid grid-cols-9 gap-4 text-xs font-medium tracking-wider text-white uppercase">
+                    <div>Generated At</div>
                     <div>SN</div>
                     <div>Code</div>
                     <div>Status</div>
@@ -959,11 +1047,15 @@ export default function PremiumTrackingSystem() {
                           coupon.code.toLowerCase(),
                       );
                       return (
+
                         <div
                           key={coupon.code}
-                          className={`grid grid-cols-8 gap-4 px-5 py-3.5 items-center hover:bg-red-50/10 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                          className={`grid grid-cols-9 gap-4 px-5 py-3.5 items-center hover:bg-red-50/10 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                             }`}
                         >
+                          <div className="text-sm text-slate-500">
+                            {formatDate(coupon.generatedAt || coupon.created)}
+                          </div>
                           <div className="text-sm font-medium text-slate-500">
                             {coupon.sn || "—"}
                           </div>
