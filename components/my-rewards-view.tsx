@@ -97,7 +97,7 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
               </div>
             </div>
             <p className="text-3xl font-bold text-slate-800">{rewards.length}</p>
-            <p className="text-sm text-slate-500 mt-1">Coupons Claimed</p>
+            <p className="text-sm text-slate-500 mt-1">Reward Claimed</p>
           </CardContent>
         </Card>
 
@@ -109,7 +109,7 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
               </div>
             </div>
             <p className="text-3xl font-bold text-slate-800">{rewards.filter(r => r.makePayment && r.makePayment.trim() !== '').length}</p>
-            <p className="text-sm text-slate-500 mt-1">Successfully Verified</p>
+            <p className="text-sm text-slate-500 mt-1">Reward Received</p>
           </CardContent>
         </Card>
       </div>
@@ -163,11 +163,10 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
                         <span className="text-sm text-slate-500 italic">{reward.remark || "—"}</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                          reward.status === 'used' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
-                        }`}>
-                          {reward.status === 'used' 
-                            ? (reward.makePayment === 'Done' ? 'Reward Transferred🎉' : 'Used') 
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${reward.status === 'used' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
+                          }`}>
+                          {reward.status === 'used'
+                            ? (reward.makePayment === 'Done' ? 'Reward Transferred🎉' : 'Used')
                             : reward.status}
                         </span>
                       </td>
