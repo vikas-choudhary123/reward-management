@@ -29,8 +29,8 @@ export default function LoginView({ onLogin }: LoginViewProps) {
 
     try {
       // Choose sheet based on login type
-      const sheetName = loginType === "admin" ? "Login" : "userLogin";
-      
+      const sheetName = loginType === "admin" ? "AdminData" : "UserData";
+
       const response = await fetch(
         `${GOOGLE_SCRIPT_URL}?sheet=${sheetName}&action=fetch`
       );
@@ -56,7 +56,7 @@ export default function LoginView({ onLogin }: LoginViewProps) {
         if (matchedUser) {
           // Set role based on login type
           const userRole = loginType === "admin" ? "Admin" : "User";
-          
+
           onLogin({
             name: matchedUser[1],  // Name from column B (index 1)
             id: matchedUser[2],    // ID from column C (index 2)
@@ -107,11 +107,10 @@ export default function LoginView({ onLogin }: LoginViewProps) {
                 setUserId("");
                 setPassword("");
               }}
-              className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-                loginType === "user"
+              className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${loginType === "user"
                   ? "bg-white text-red-600 shadow-sm"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-              }`}
+                }`}
             >
               <User className="w-4 h-4" />
               User Login
@@ -123,11 +122,10 @@ export default function LoginView({ onLogin }: LoginViewProps) {
                 setUserId("");
                 setPassword("");
               }}
-              className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-                loginType === "admin"
+              className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${loginType === "admin"
                   ? "bg-white text-red-600 shadow-sm"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-              }`}
+                }`}
             >
               <Shield className="w-4 h-4" />
               Admin Login

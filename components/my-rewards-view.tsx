@@ -66,6 +66,20 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
     fetchRewards();
   }, [userPhone]);
 
+  const totalClaimedAmount = rewards.reduce(
+    (sum, r) => sum + (parseFloat(r.amount) || 0),
+    0
+  );
+
+  const receivedRewards = rewards.filter(
+    (r) => r.makePayment && r.makePayment.trim() !== "",
+  );
+
+  const totalReceivedAmount = receivedRewards.reduce(
+    (sum, r) => sum + (parseFloat(r.amount) || 0),
+    0
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -79,54 +93,42 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-red-500 to-orange-600 border-none shadow-lg shadow-red-200">
-          <CardContent className="p-6 text-white">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2 bg-white/20 rounded-lg">
-                <Gift className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xs font-medium bg-white/20 px-2 py-1 rounded-full uppercase tracking-wider">
-                <p className="text-3xl font-bold">
-                  ₹
-                  {rewards.reduce((acc, r) => acc + (Number(r.amount) || 0), 0)}
-                </p>
-              </span>
-            </div>
-
-            <p className="text-lg text-red-100 mt-1">No. of coupens</p>
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="bg-white border-slate-100 shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-2 bg-green-50 rounded-lg">
+              <div className="p-5 bg-green-50 rounded-lg">
+                <p className="text-xlg text-slate-500 mt-1">Reward Claimed</p>
                 <CheckCircle2 className="w-6 h-6 text-green-600" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-slate-800">
-              {rewards.length}
-            </p>
-            <p className="text-sm text-slate-500 mt-1">Reward Claimed</p>
+            <div className="pl-5">
+              <p className="text-3xl font-bold text-slate-800">
+                <p className="text-xl inline">No. of Coupens</p> {rewards.length}
+              </p>
+              <p className="text-sm text-slate-500 mt-1.5 font-medium">
+                Total Amount: <span className="font-bold text-green-600">₹{totalClaimedAmount}</span>
+              </p>
+            </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white border-slate-100 shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-2 bg-blue-50 rounded-lg">
+              <div className="p-5 bg-blue-50 rounded-lg">
+                <p className="text-xlg text-slate-500 mt-1">Reward Received</p>
                 <Clock className="w-6 h-6 text-blue-600" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-slate-800">
-              {
-                rewards.filter(
-                  (r) => r.makePayment && r.makePayment.trim() !== "",
-                ).length
-              }
-            </p>
-            <p className="text-sm text-slate-500 mt-1">Reward Received</p>
+            <div className="pl-5">
+              <p className="text-3xl font-bold text-slate-800">
+                <p className="text-xl inline">No. of Coupens</p>  {receivedRewards.length}
+              </p>
+              <p className="text-sm text-slate-500 mt-1.5 font-medium">
+                Total Amount: <span className="font-bold text-blue-600">₹{totalReceivedAmount}</span>
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -208,11 +210,10 @@ export default function MyRewardsView({ userPhone }: { userPhone: string }) {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            reward.status === "used"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-orange-100 text-orange-700"
-                          }`}
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${reward.status === "used"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-orange-100 text-orange-700"
+                            }`}
                         >
                           {reward.status === "used"
                             ? reward.makePayment === "Done"
